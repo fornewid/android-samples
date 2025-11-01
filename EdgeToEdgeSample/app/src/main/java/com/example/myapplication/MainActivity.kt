@@ -28,6 +28,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+        setAppearanceTransparentCaptionBar(isTransparent = true)
         setContent {
             SampleTheme {
                 MainScreen(
