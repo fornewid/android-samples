@@ -18,7 +18,7 @@ class ViewSampleActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
-        setAppearanceTransparentCaptionBar(isTransparent = true)
+        setAppearanceTransparentCaptionBar(isTransparent = false)
         super.onCreate(savedInstanceState)
         val binding = ViewSampleBinding.inflate(layoutInflater)
         setContentView(binding.root)

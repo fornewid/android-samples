@@ -31,7 +31,7 @@ class ComposeSampleActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-        setAppearanceTransparentCaptionBar(isTransparent = true)
+        setAppearanceTransparentCaptionBar(isTransparent = false)
         setContent {
             SampleTheme {
                 EdgeToEdgeScreen()
