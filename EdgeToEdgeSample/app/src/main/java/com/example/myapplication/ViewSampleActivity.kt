@@ -8,6 +8,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.enableEdgeToEdge
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.updateLayoutParams
 import androidx.core.view.updatePadding
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -18,21 +19,32 @@ class ViewSampleActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
-        setAppearanceTransparentCaptionBar(isTransparent = false)
+        enableTransparentCaptionBar()
         super.onCreate(savedInstanceState)
         val binding = ViewSampleBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
         ViewCompat.setOnApplyWindowInsetsListener(binding.root) { v, insets ->
+            val captionBar = insets.captionBar
+            if (captionBar != null) {
+                binding.captionBarContent.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                    height = captionBar.safeInsetTop
+                    leftMargin = captionBar.safeInsetLeft
+                    rightMargin = captionBar.safeInsetRight
+                }
+            }
+
             val systemBars = insets.getInsets(
                 WindowInsetsCompat.Type.systemBars()
                         or WindowInsetsCompat.Type.displayCutout()
             )
             v.updatePadding(
                 left = systemBars.left,
-                top = systemBars.top,
                 right = systemBars.right,
             )
+            binding.toolbar.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                topMargin = systemBars.top
+            }
             binding.recyclerView.updatePadding(
                 bottom = systemBars.bottom,
             )
