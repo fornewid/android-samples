@@ -3,7 +3,6 @@ package com.example.myapplication
 import android.content.res.Configuration
 import android.graphics.Rect
 import android.os.Build
-import android.view.Display.DEFAULT_DISPLAY
 import android.view.WindowInsetsController.APPEARANCE_LIGHT_CAPTION_BARS
 import android.view.WindowInsetsController.APPEARANCE_TRANSPARENT_CAPTION_BAR_BACKGROUND
 import androidx.activity.ComponentActivity
@@ -12,19 +11,14 @@ import androidx.core.view.WindowInsetsCompat
 
 fun ComponentActivity.enableTransparentCaptionBar() {
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM) {
-        val isDesktopWindowing = isSystemInDesktopWindowing()
-        if (isDesktopWindowing) {
+        val inFreeformWindowingMode = true // There's no public API.
+        if (inFreeformWindowingMode) {
+            setAppearanceTransparentCaptionBar(isTransparent = false)
+        } else {
             setAppearanceTransparentCaptionBar(isTransparent = true)
             setAppearanceLightCaptionBar(isLight = isSystemInDarkTheme().not())
-        } else { // freeform
-            setAppearanceTransparentCaptionBar(isTransparent = false)
         }
     }
-}
-
-@RequiresApi(35)
-private fun ComponentActivity.isSystemInDesktopWindowing(): Boolean {
-    return display?.displayId != DEFAULT_DISPLAY
 }
 
 private fun ComponentActivity.isSystemInDarkTheme(): Boolean {
@@ -84,6 +78,10 @@ class CaptionBarCompat private constructor(
     val safeInsetBottom: Int = 0
     val safeInsetLeft: Int = boundingRects.firstOrNull()?.width() ?: 0
     val safeInsetRight: Int = boundingRects.lastOrNull()?.width() ?: 0
+
+    override fun toString(): String {
+        return "CaptionBarCompat{$boundingRects}"
+    }
 
     companion object {
         fun wrap(boundingRects: List<Rect>?): CaptionBarCompat? {
