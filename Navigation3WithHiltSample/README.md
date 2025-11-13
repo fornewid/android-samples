@@ -3,4 +3,4 @@ This is a sample project using the [Jetpack Navigation 3](https://developer.andr
 
 ## Screenshots
 
-<video src="" />
+<video src="https://github.com/user-attachments/assets/4073ff14-0b0a-437f-966e-7ecbf1c5400d" />
