@@ -15,6 +15,8 @@ import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
+import androidx.compose.material3.adaptive.navigation3.ListDetailSceneStrategy
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -35,18 +37,23 @@ import dagger.multibindings.IntoSet
 @InstallIn(ActivityRetainedComponent::class)
 object ConversationModule {
 
+    @OptIn(ExperimentalMaterial3AdaptiveApi::class)
     @IntoSet
     @Provides
     fun provideEntryProviderInstaller(navigator: Navigator): EntryProviderInstaller =
         {
-            entry<ConversationList> {
+            entry<ConversationList>(
+                metadata = ListDetailSceneStrategy.listPane()
+            ) {
                 ConversationListScreen(
                     onConversationClicked = { conversationDetail ->
                         navigator.goTo(conversationDetail)
                     }
                 )
             }
-            entry<ConversationDetail> { key ->
+            entry<ConversationDetail>(
+                metadata = ListDetailSceneStrategy.detailPane()
+            ) { key ->
                 ConversationDetailScreen(key) { navigator.goTo(Profile) }
             }
         }
