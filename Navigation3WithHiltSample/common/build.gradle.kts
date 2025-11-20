@@ -29,9 +29,11 @@ kotlin {
 dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.navigation3.runtime)
+    implementation(libs.androidx.navigation3.ui)
 
     implementation(platform(libs.compose.bom))
     implementation(libs.compose.runtime)
+    implementation(libs.compose.material3)
 
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)

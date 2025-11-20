@@ -1,3 +1,5 @@
 package com.example.profile
 
-object Profile
+data class Profile(val id: String)
+
+data class Info(val id: String)
