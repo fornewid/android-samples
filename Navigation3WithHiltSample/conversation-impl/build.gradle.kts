@@ -32,6 +32,7 @@ dependencies {
     implementation(project(":conversation-api"))
 
     implementation(libs.androidx.core.ktx)
+    implementation(libs.androidx.hilt.lifecycle.viewmodel.compose)
     implementation(libs.androidx.navigation3.runtime)
 
     implementation(platform(libs.compose.bom))

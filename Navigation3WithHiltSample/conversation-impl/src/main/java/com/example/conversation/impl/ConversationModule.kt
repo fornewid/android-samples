@@ -1,5 +1,6 @@
 package com.example.conversation.impl
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -27,6 +28,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.ViewModel
 import androidx.navigation3.scene.DialogSceneStrategy
 import com.example.common.BottomSheetSceneStrategy
 import com.example.common.EntryProviderInstaller
@@ -38,9 +41,14 @@ import com.example.conversation.Dialog
 import com.example.profile.Profile
 import dagger.Module
 import dagger.Provides
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 import dagger.hilt.InstallIn
 import dagger.hilt.android.components.ActivityRetainedComponent
+import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.multibindings.IntoSet
+import javax.inject.Inject
 
 @Module
 @InstallIn(ActivityRetainedComponent::class)
@@ -54,7 +62,9 @@ object ConversationModule {
             entry<ConversationList>(
                 metadata = ListDetailSceneStrategy.listPane("conversation")
             ) {
+                val viewModel = hiltViewModel<ConversationListViewModel>()
                 ConversationListScreen(
+                    viewModel,
                     onConversationClicked = { conversationDetail ->
                         navigator.goTo(conversationDetail)
                     }
@@ -63,7 +73,13 @@ object ConversationModule {
             entry<ConversationDetail>(
                 metadata = ListDetailSceneStrategy.detailPane("conversation")
             ) { key ->
+                val viewModel = hiltViewModel<ConversationDetailViewModel, ConversationDetailViewModel.Factory>(
+                    creationCallback = { factory ->
+                        factory.create(key)
+                    }
+                )
                 ConversationDetailScreen(
+                    viewModel,
                     conversationDetail = key,
                     onProfileClicked = { navigator.goTo(Profile(id = "1")) },
                     onDialogClicked = { navigator.goTo(Dialog(id = "dialog")) },
@@ -100,6 +116,7 @@ object ConversationModule {
 
 @Composable
 private fun ConversationListScreen(
+    viewModel: ConversationListViewModel,
     onConversationClicked: (ConversationDetail) -> Unit
 ) {
     Scaffold { paddingValues ->
@@ -131,8 +148,19 @@ private fun ConversationListScreen(
     }
 }
 
+@HiltViewModel
+class ConversationListViewModel @Inject constructor(
+) : ViewModel() {
+
+    init {
+        Log.d("ConversationDetailViewModel", "init: ${hashCode()}")
+    }
+}
+
+
 @Composable
 private fun ConversationDetailScreen(
+    viewModel: ConversationDetailViewModel,
     conversationDetail: ConversationDetail,
     onProfileClicked: () -> Unit,
     onDialogClicked: () -> Unit,
@@ -166,3 +194,18 @@ private fun ConversationDetailScreen(
 
 private val ConversationDetail.color: Color
     get() = colors[id % colors.size]
+
+@HiltViewModel(assistedFactory = ConversationDetailViewModel.Factory::class)
+class ConversationDetailViewModel @AssistedInject constructor(
+    @Assisted val collectionDetail: ConversationDetail
+) : ViewModel() {
+
+    init {
+        Log.d("ConversationDetailViewModel", "init: ${collectionDetail.id} - ${collectionDetail.hashCode()} - $collectionDetail")
+    }
+
+    @AssistedFactory
+    interface Factory {
+        fun create(collectionDetail: ConversationDetail): ConversationDetailViewModel
+    }
+}

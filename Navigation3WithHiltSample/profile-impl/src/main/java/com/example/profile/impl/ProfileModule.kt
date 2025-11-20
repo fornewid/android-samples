@@ -1,5 +1,6 @@
 package com.example.profile.impl
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -16,14 +17,20 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.ViewModel
 import com.example.common.EntryProviderInstaller
 import com.example.common.Navigator
 import com.example.profile.Info
 import com.example.profile.Profile
 import dagger.Module
 import dagger.Provides
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 import dagger.hilt.InstallIn
 import dagger.hilt.android.components.ActivityRetainedComponent
+import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.multibindings.IntoSet
 
 @Module
@@ -38,7 +45,13 @@ object ProfileModule {
 //            metadata = ListDetailSceneStrategy.extraPane(),
             metadata = ListDetailSceneStrategy.listPane("profile"),
         ) { key ->
+            val viewModel = hiltViewModel<ProfileViewModel, ProfileViewModel.Factory>(
+                creationCallback = { factory ->
+                    factory.create(key)
+                }
+            )
             ProfileScreen(
+                viewModel,
                 key,
                 onProfileClicked = { navigator.goTo(Profile(id = "2")) },
                 onInfoClicked = { navigator.goTo(Info(id = "1")) },
@@ -47,7 +60,13 @@ object ProfileModule {
         entry<Info>(
             metadata = ListDetailSceneStrategy.detailPane("profile"),
         ) { key ->
+            val viewModel = hiltViewModel<InfoViewModel, InfoViewModel.Factory>(
+                creationCallback = { factory ->
+                    factory.create(key)
+                }
+            )
             InfoScreen(
+                viewModel,
                 key,
                 onInfoClicked = { navigator.goTo(Info(id = key.id + "1")) },
             )
@@ -57,6 +76,7 @@ object ProfileModule {
 
 @Composable
 private fun ProfileScreen(
+    viewModel: ProfileViewModel,
     key: Profile,
     onProfileClicked: () -> Unit,
     onInfoClicked: () -> Unit,
@@ -71,7 +91,7 @@ private fun ProfileScreen(
         verticalArrangement = Arrangement.Center
     ) {
         Text(
-            text = "Profile Screen $key",
+            text = "Profile Screen $key - $viewModel",
             style = MaterialTheme.typography.headlineMedium,
             color = MaterialTheme.colorScheme.onSurface
         )
@@ -85,8 +105,24 @@ private fun ProfileScreen(
     }
 }
 
+@HiltViewModel(assistedFactory = ProfileViewModel.Factory::class)
+class ProfileViewModel @AssistedInject constructor(
+    @Assisted val profile: Profile
+) : ViewModel() {
+
+    init {
+        Log.d("ProfileViewModel", "init: ${profile.id} - ${profile.hashCode()} - $profile")
+    }
+
+    @AssistedFactory
+    interface Factory {
+        fun create(profile: Profile): ProfileViewModel
+    }
+}
+
 @Composable
 private fun InfoScreen(
+    viewModel: InfoViewModel,
     key: Info,
     onInfoClicked: () -> Unit,
 ) {
@@ -108,5 +144,20 @@ private fun InfoScreen(
         Button(onClick = onInfoClicked) {
             Text("View Info")
         }
+    }
+}
+
+@HiltViewModel(assistedFactory = InfoViewModel.Factory::class)
+class InfoViewModel @AssistedInject constructor(
+    @Assisted val info: Info
+) : ViewModel() {
+
+    init {
+        Log.d("InfoViewModel", "init: ${info.id} - ${info.hashCode()} - $info")
+    }
+
+    @AssistedFactory
+    interface Factory {
+        fun create(info: Info): InfoViewModel
     }
 }
