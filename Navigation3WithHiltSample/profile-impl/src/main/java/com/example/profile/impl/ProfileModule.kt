@@ -7,6 +7,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
+import androidx.compose.material3.adaptive.navigation3.ListDetailSceneStrategy
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -23,10 +25,13 @@ import dagger.multibindings.IntoSet
 @InstallIn(ActivityRetainedComponent::class)
 object ProfileModule {
 
+    @OptIn(ExperimentalMaterial3AdaptiveApi::class)
     @IntoSet
     @Provides
-    fun provideEntryProviderInstaller() : EntryProviderInstaller = {
-        entry<Profile>{
+    fun provideEntryProviderInstaller(): EntryProviderInstaller = {
+        entry<Profile>(
+            metadata = ListDetailSceneStrategy.extraPane(),
+        ) {
             ProfileScreen()
         }
     }
