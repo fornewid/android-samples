@@ -3,6 +3,7 @@ package com.example.conversation.impl
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -10,22 +11,30 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
 import androidx.compose.material3.adaptive.navigation3.ListDetailSceneStrategy
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import androidx.navigation3.scene.DialogSceneStrategy
+import com.example.common.BottomSheetSceneStrategy
 import com.example.common.EntryProviderInstaller
 import com.example.common.Navigator
+import com.example.conversation.BottomSheet
 import com.example.conversation.ConversationDetail
 import com.example.conversation.ConversationList
+import com.example.conversation.Dialog
 import com.example.profile.Profile
 import dagger.Module
 import dagger.Provides
@@ -37,13 +46,13 @@ import dagger.multibindings.IntoSet
 @InstallIn(ActivityRetainedComponent::class)
 object ConversationModule {
 
-    @OptIn(ExperimentalMaterial3AdaptiveApi::class)
+    @OptIn(ExperimentalMaterial3AdaptiveApi::class, ExperimentalMaterial3Api::class)
     @IntoSet
     @Provides
     fun provideEntryProviderInstaller(navigator: Navigator): EntryProviderInstaller =
         {
             entry<ConversationList>(
-                metadata = ListDetailSceneStrategy.listPane()
+                metadata = ListDetailSceneStrategy.listPane("conversation")
             ) {
                 ConversationListScreen(
                     onConversationClicked = { conversationDetail ->
@@ -52,9 +61,39 @@ object ConversationModule {
                 )
             }
             entry<ConversationDetail>(
-                metadata = ListDetailSceneStrategy.detailPane()
+                metadata = ListDetailSceneStrategy.detailPane("conversation")
             ) { key ->
-                ConversationDetailScreen(key) { navigator.goTo(Profile) }
+                ConversationDetailScreen(
+                    conversationDetail = key,
+                    onProfileClicked = { navigator.goTo(Profile(id = "1")) },
+                    onDialogClicked = { navigator.goTo(Dialog(id = "dialog")) },
+                    onBottomSheetClicked = { navigator.goTo(BottomSheet(id = "bottom sheet")) },
+                )
+            }
+            entry<Dialog>(
+                metadata = DialogSceneStrategy.dialog()
+            ) { key ->
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .clip(RoundedCornerShape(48.dp))
+                        .background(Color.Green),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Text(text = key.id)
+                }
+            }
+            entry<BottomSheet>(
+                metadata = BottomSheetSceneStrategy.bottomSheet()
+            ) { key ->
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(Color.Green),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Text(text = key.id)
+                }
             }
         }
 }
@@ -63,8 +102,10 @@ object ConversationModule {
 private fun ConversationListScreen(
     onConversationClicked: (ConversationDetail) -> Unit
 ) {
+    Scaffold { paddingValues ->
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
+        contentPadding = paddingValues,
     ) {
         items(10) { index ->
             val conversationId = index + 1
@@ -87,12 +128,15 @@ private fun ConversationListScreen(
             )
         }
     }
+    }
 }
 
 @Composable
 private fun ConversationDetailScreen(
     conversationDetail: ConversationDetail,
-    onProfileClicked: () -> Unit
+    onProfileClicked: () -> Unit,
+    onDialogClicked: () -> Unit,
+    onBottomSheetClicked: () -> Unit,
 ) {
     Column(
         modifier = Modifier
@@ -110,6 +154,12 @@ private fun ConversationDetailScreen(
         Spacer(modifier = Modifier.height(16.dp))
         Button(onClick = onProfileClicked) {
             Text("View Profile")
+        }
+        Button(onClick = onDialogClicked) {
+            Text("View Dialog")
+        }
+        Button(onClick = onBottomSheetClicked) {
+            Text("View Bottom Sheet")
         }
     }
 }
