@@ -19,8 +19,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import androidx.core.os.bundleOf
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
+import com.example.common.ArgumentProviderInstaller
 import com.example.common.EntryProviderInstaller
 import com.example.common.Navigator
 import com.example.profile.Info
@@ -38,6 +41,17 @@ import dagger.multibindings.IntoSet
 @Module
 @InstallIn(ActivityRetainedComponent::class)
 object ProfileModule {
+
+    @IntoSet
+    @Provides
+    fun provideArgumentProviderInstaller(): ArgumentProviderInstaller = {
+        argument<Profile> { key ->
+            bundleOf(ProfileViewModel.KEY_ID to key.id)
+        }
+        argument<Info> { key ->
+            bundleOf(InfoViewModel.KEY_ID to key.id)
+        }
+    }
 
     @OptIn(ExperimentalMaterial3AdaptiveApi::class)
     @IntoSet
@@ -121,16 +135,23 @@ private fun ProfileScreen(
 
 @HiltViewModel(assistedFactory = ProfileViewModel.Factory::class)
 class ProfileViewModel @AssistedInject constructor(
-    @Assisted val profile: Profile
+    @Assisted val profile: Profile,
+    savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
 
+    private val id: String? = savedStateHandle["id"]
+
     init {
-        Log.d("ProfileViewModel", "init: ${profile.id} - ${profile.hashCode()} - $profile")
+        Log.d("ProfileViewModel", "init: ${profile.id} - ${profile.hashCode()} - $profile - $id")
     }
 
     @AssistedFactory
     interface Factory {
         fun create(profile: Profile): ProfileViewModel
+    }
+
+    companion object {
+        const val KEY_ID = "id"
     }
 }
 
@@ -163,15 +184,22 @@ private fun InfoScreen(
 
 @HiltViewModel(assistedFactory = InfoViewModel.Factory::class)
 class InfoViewModel @AssistedInject constructor(
-    @Assisted val info: Info
+    @Assisted val info: Info,
+    savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
 
+    private val id: String? = savedStateHandle[KEY_ID]
+
     init {
-        Log.d("InfoViewModel", "init: ${info.id} - ${info.hashCode()} - $info")
+        Log.d("InfoViewModel", "init: ${info.id} - ${info.hashCode()} - $info - $id")
     }
 
     @AssistedFactory
     interface Factory {
         fun create(info: Info): InfoViewModel
+    }
+
+    companion object {
+        const val KEY_ID = "id"
     }
 }
