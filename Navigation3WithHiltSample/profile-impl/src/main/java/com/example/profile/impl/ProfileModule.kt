@@ -3,6 +3,7 @@ package com.example.profile.impl
 import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -16,6 +17,7 @@ import androidx.compose.material3.adaptive.navigation3.ListDetailSceneStrategy
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.ViewModel
@@ -43,7 +45,19 @@ object ProfileModule {
     fun provideEntryProviderInstaller(navigator: Navigator): EntryProviderInstaller = {
         entry<Profile>(
 //            metadata = ListDetailSceneStrategy.extraPane(),
-            metadata = ListDetailSceneStrategy.listPane("profile"),
+            metadata = ListDetailSceneStrategy.listPane(
+                sceneKey = "profile",
+                detailPlaceholder = {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(Color.LightGray),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        Text("Placeholder")
+                    }
+                },
+            )
         ) { key ->
             val viewModel = hiltViewModel<ProfileViewModel, ProfileViewModel.Factory>(
                 creationCallback = { factory ->

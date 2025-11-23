@@ -8,6 +8,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.material3.adaptive.layout.calculatePaneScaffoldDirective
+import androidx.compose.material3.adaptive.navigation.BackNavigationBehavior
 import androidx.compose.material3.adaptive.navigation3.rememberListDetailSceneStrategy
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -34,6 +35,7 @@ import com.example.common.EntryProviderInstaller
 import com.example.common.Navigator
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
+import soup.compose.material.motion.animation.materialSharedAxisZ
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -68,7 +70,13 @@ private fun StandardMainScreen(
         calculatePaneScaffoldDirective(windowAdaptiveInfo)
             .copy(horizontalPartitionSpacerSize = 0.dp)
     }
-    val listDetailStrategy = rememberListDetailSceneStrategy<Any>(directive = directive)
+    val listDetailStrategy = rememberListDetailSceneStrategy<Any>(
+        directive = directive,
+//        backNavigationBehavior = BackNavigationBehavior.PopUntilScaffoldValueChange,
+        backNavigationBehavior = BackNavigationBehavior.PopLatest,
+//        backNavigationBehavior = BackNavigationBehavior.PopUntilCurrentDestinationChange,
+//        backNavigationBehavior = BackNavigationBehavior.PopUntilContentChange,
+    )
     val dialogStrategy = remember { DialogSceneStrategy<Any>() }
     val bottomSheetStrategy = remember { BottomSheetSceneStrategy<Any>() }
     NavDisplay(
@@ -81,7 +89,10 @@ private fun StandardMainScreen(
         ),
         entryProvider = entryProvider {
             entryProviderScopes.forEach { builder -> this.builder() }
-        }
+        },
+        transitionSpec = { materialSharedAxisZ(forward = true) },
+        popTransitionSpec = { materialSharedAxisZ(forward = false) },
+        predictivePopTransitionSpec = { materialSharedAxisZ(forward = false) },
     )
 
     LaunchedEffect(Unit) {
