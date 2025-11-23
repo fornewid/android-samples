@@ -17,9 +17,11 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.core.os.bundleOf
 import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberDecoratedNavEntries
+import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.scene.DialogSceneStrategy
 import androidx.navigation3.scene.SceneInfo
@@ -30,9 +32,14 @@ import androidx.navigation3.ui.defaultPredictivePopTransitionSpec
 import androidx.navigation3.ui.defaultTransitionSpec
 import androidx.navigationevent.compose.NavigationBackHandler
 import androidx.navigationevent.compose.rememberNavigationEventState
+import com.example.common.ArgumentProviderInstaller
 import com.example.common.BottomSheetSceneStrategy
 import com.example.common.EntryProviderInstaller
 import com.example.common.Navigator
+import com.example.common.argumentProvider
+import com.example.conversation.ConversationDetail
+import com.example.profile.Info
+import com.example.profile.Profile
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
 import soup.compose.material.motion.animation.materialSharedAxisZ
@@ -47,12 +54,15 @@ class MainActivity : ComponentActivity() {
     @Inject
     lateinit var entryProviderScopes: Set<@JvmSuppressWildcards EntryProviderInstaller>
 
+    @Inject
+    lateinit var argumentProviderScopes: Set<@JvmSuppressWildcards ArgumentProviderInstaller>
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
             SampleTheme {
-                StandardMainScreen(navigator, entryProviderScopes)
+                StandardMainScreen(navigator, entryProviderScopes, argumentProviderScopes)
 //                CustomMainScreen(navigator, entryProviderScopes)
             }
         }
@@ -64,7 +74,9 @@ class MainActivity : ComponentActivity() {
 private fun StandardMainScreen(
     navigator: Navigator,
     entryProviderScopes: Set<EntryProviderInstaller>,
+    argumentProviderScopes: Set<ArgumentProviderInstaller>,
 ) {
+    rememberNavBackStack()
     val windowAdaptiveInfo = currentWindowAdaptiveInfo()
     val directive = remember(windowAdaptiveInfo) {
         calculatePaneScaffoldDirective(windowAdaptiveInfo)
@@ -85,7 +97,12 @@ private fun StandardMainScreen(
         sceneStrategy = listDetailStrategy then dialogStrategy then bottomSheetStrategy,
         entryDecorators = listOf(
             rememberSaveableStateHolderNavEntryDecorator(),
-            rememberViewModelStoreNavEntryDecorator()
+//            rememberViewModelStoreNavEntryDecorator()
+            rememberArgumentViewModelStoreNavEntryDecorator(
+                argumentProvider = argumentProvider {
+                    argumentProviderScopes.forEach { builder -> this.builder() }
+                },
+            )
         ),
         entryProvider = entryProvider {
             entryProviderScopes.forEach { builder -> this.builder() }

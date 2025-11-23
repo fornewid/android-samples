@@ -28,9 +28,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import androidx.core.os.bundleOf
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.navigation3.scene.DialogSceneStrategy
+import com.example.common.ArgumentProviderInstaller
 import com.example.common.BottomSheetSceneStrategy
 import com.example.common.EntryProviderInstaller
 import com.example.common.Navigator
@@ -53,6 +56,14 @@ import javax.inject.Inject
 @Module
 @InstallIn(ActivityRetainedComponent::class)
 object ConversationModule {
+
+    @IntoSet
+    @Provides
+    fun provideArgumentProviderInstaller(): ArgumentProviderInstaller = {
+        argument<ConversationDetail> { key ->
+            bundleOf(ConversationDetailViewModel.KEY_ID to key.id)
+        }
+    }
 
     @OptIn(ExperimentalMaterial3AdaptiveApi::class, ExperimentalMaterial3Api::class)
     @IntoSet
@@ -90,6 +101,7 @@ object ConversationModule {
                         factory.create(key)
                     }
                 )
+//                val viewModel = viewModel<ConversationDetailViewModel>()
                 ConversationDetailScreen(
                     viewModel,
                     conversationDetail = key,
@@ -209,15 +221,32 @@ private val ConversationDetail.color: Color
 
 @HiltViewModel(assistedFactory = ConversationDetailViewModel.Factory::class)
 class ConversationDetailViewModel @AssistedInject constructor(
-    @Assisted val collectionDetail: ConversationDetail
+    @Assisted val collectionDetail: ConversationDetail,
+    savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
 
+    private val id: Int? = savedStateHandle[KEY_ID]
+
     init {
-        Log.d("ConversationDetailViewModel", "init: ${collectionDetail.id} - ${collectionDetail.hashCode()} - $collectionDetail")
+        Log.d("ConversationDetailViewModel", "init: ${collectionDetail.id} - ${collectionDetail.hashCode()} - $collectionDetail - ${id}")
     }
 
     @AssistedFactory
     interface Factory {
         fun create(collectionDetail: ConversationDetail): ConversationDetailViewModel
     }
+
+    companion object {
+        const val KEY_ID = "id"
+    }
 }
+
+//class ConversationDetailViewModel(
+//    val savedStateHandle: SavedStateHandle,
+//) : ViewModel() {
+//
+//    init {
+////        "key"
+//        Log.d("ConversationDetailViewModel", "init: ${savedStateHandle.keys()}")
+//    }
+//}
