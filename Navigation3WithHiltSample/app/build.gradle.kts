@@ -71,6 +71,8 @@ dependencies {
     implementation(libs.compose.material3.adaptive.navigation3)
     debugImplementation(libs.compose.ui.tooling)
 
+    implementation(libs.material.motion)
+
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)
 }

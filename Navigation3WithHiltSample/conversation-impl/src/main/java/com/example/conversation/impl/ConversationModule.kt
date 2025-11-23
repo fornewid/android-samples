@@ -60,7 +60,19 @@ object ConversationModule {
     fun provideEntryProviderInstaller(navigator: Navigator): EntryProviderInstaller =
         {
             entry<ConversationList>(
-                metadata = ListDetailSceneStrategy.listPane("conversation")
+                metadata = ListDetailSceneStrategy.listPane(
+                    sceneKey = "conversation",
+                    detailPlaceholder = {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .background(Color.LightGray),
+                            contentAlignment = Alignment.Center,
+                        ) {
+                            Text("Placeholder")
+                        }
+                    },
+                )
             ) {
                 val viewModel = hiltViewModel<ConversationListViewModel>()
                 ConversationListScreen(
